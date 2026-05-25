@@ -1,0 +1,14 @@
+{
+  "name": "codtech-chat-app",
+  "version": "1.0.0",
+  "description": "Real-Time Chat Application - Codtech Internship Task 2",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "author": "Karthika Shanmuga Pandian - CTIS9056",
+  "dependencies": {
+    "express": "^4.18.2",
+    "socket.io": "^4.7.2"
+  }
+}
