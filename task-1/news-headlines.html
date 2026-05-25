@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NewsNow — Live Headlines</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    /* ===== CSS VARIABLES & RESET ===== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f5f0e8;
+      --surface: #ffffff;
+      --ink: #1a1a1a;
+      --ink-muted: #6b6560;
+      --ink-light: #a09a94;
+      --accent: #c0392b;
+      --accent-light: #f9e8e6;
+      --border: #ddd8d0;
+      --tag-bg: #1a1a1a;
+      --tag-text: #f5f0e8;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background-color: var(--bg);
+      color: var(--ink);
+      min-height: 100vh;
+    }
+
+    /* ===== HEADER ===== */
+    header {
+      background: var(--surface);
+      border-bottom: 2px solid var(--ink);
+      padding: 0 2rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 0 0.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .dateline {
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      color: var(--ink-muted);
+      text-transform: uppercase;
+    }
+
+    .logo {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.2rem;
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      color: var(--ink);
+      text-align: center;
+    }
+
+    .logo span { color: var(--accent); }
+
+    .header-right {
+      font-size: 12px;
+      color: var(--ink-muted);
+      text-align: right;
+      letter-spacing: 0.04em;
+    }
+
+    /* ===== CATEGORY NAV ===== */
+    .category-nav {
+      display: flex;
+      gap: 0;
+      overflow-x: auto;
+      scrollbar-width: none;
+      padding: 0.4rem 0;
+    }
+
+    .category-nav::-webkit-scrollbar { display: none; }
+
+    .cat-btn {
+      background: none;
+      border: none;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--ink-muted);
+      padding: 0.3rem 1rem;
+      cursor: pointer;
+      white-space: nowrap;
+      border-bottom: 2px solid transparent;
+      transition: color 0.2s, border-color 0.2s;
+    }
+
+    .cat-btn:hover { color: var(--ink); }
+    .cat-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+    /* ===== SEARCH BAR ===== */
+    .search-wrap {
+      max-width: 1200px;
+      margin: 1.5rem auto 0;
+      padding: 0 2rem;
+    }
+
+    .search-bar {
+      display: flex;
+      align-items: center;
+      background: var(--surface);
+      border: 1.5px solid var(--ink);
+      border-radius: 2px;
+      overflow: hidden;
+      max-width: 560px;
+    }
+
+    .search-bar input {
+      flex: 1;
+      border: none;
+      outline: none;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      padding: 0.65rem 1rem;
+      background: transparent;
+      color: var(--ink);
+    }
+
+    .search-bar input::placeholder { color: var(--ink-light); }
+
+    .search-bar button {
+      background: var(--ink);
+      color: var(--bg);
+      border: none;
+      padding: 0.65rem 1.2rem;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .search-bar button:hover { background: var(--accent); }
+
+    /* ===== BREAKING TICKER ===== */
+    .ticker-wrap {
+      background: var(--accent);
+      color: white;
+      padding: 0.45rem 0;
+      overflow: hidden;
+      margin-top: 1.5rem;
+    }
+
+    .ticker-inner {
+      display: flex;
+      align-items: center;
+      gap: 0;
+    }
+
+    .ticker-label {
+      background: white;
+      color: var(--accent);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 0.2rem 0.8rem;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .ticker-track {
+      overflow: hidden;
+      flex: 1;
+    }
+
+    .ticker-text {
+      display: inline-block;
+      white-space: nowrap;
+      font-size: 13px;
+      font-weight: 400;
+      animation: ticker 30s linear infinite;
+      padding-left: 2rem;
+    }
+
+    @keyframes ticker {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+
+    /* ===== MAIN LAYOUT ===== */
+    .container {
+      max-width: 1200px;
+      margin: 2rem auto;
+      padding: 0 2rem;
+    }
+
+    .section-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--ink-muted);
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    /* ===== HERO CARD ===== */
+    .hero-card {
+      background: var(--surface);
+      border: 1.5px solid var(--ink);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+      margin-bottom: 2.5rem;
+      overflow: hidden;
+      cursor: pointer;
+      transition: box-shadow 0.2s;
+    }
+
+    .hero-card:hover { box-shadow: 4px 4px 0 var(--ink); }
+
+    .hero-img {
+      width: 100%;
+      height: 320px;
+      object-fit: cover;
+      display: block;
+    }
+
+    .hero-img-placeholder {
+      width: 100%;
+      height: 320px;
+      background: linear-gradient(135deg, #1a1a1a 0%, #3d3530 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3rem;
+    }
+
+    .hero-content {
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      border-left: 1.5px solid var(--ink);
+    }
+
+    .hero-tag {
+      display: inline-block;
+      background: var(--tag-bg);
+      color: var(--tag-text);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 0.3rem 0.7rem;
+      margin-bottom: 1rem;
+      width: fit-content;
+    }
+
+    .hero-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.6rem;
+      font-weight: 700;
+      line-height: 1.3;
+      margin-bottom: 1rem;
+      color: var(--ink);
+    }
+
+    .hero-desc {
+      font-size: 14px;
+      line-height: 1.65;
+      color: var(--ink-muted);
+      flex: 1;
+      margin-bottom: 1rem;
+    }
+
+    .hero-meta {
+      font-size: 12px;
+      color: var(--ink-light);
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+    }
+
+    .hero-meta .source { font-weight: 600; color: var(--ink-muted); }
+
+    /* ===== NEWS GRID ===== */
+    .news-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .news-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      cursor: pointer;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .news-card:hover {
+      border-color: var(--ink);
+      box-shadow: 3px 3px 0 var(--border);
+    }
+
+    .card-img {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+      display: block;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .card-img-placeholder {
+      width: 100%;
+      height: 180px;
+      background: var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      border-bottom: 1px solid var(--border);
+      color: var(--ink-light);
+    }
+
+    .card-body {
+      padding: 1.1rem 1.2rem;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .card-category {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 0.5rem;
+    }
+
+    .card-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.05rem;
+      font-weight: 700;
+      line-height: 1.35;
+      color: var(--ink);
+      margin-bottom: 0.6rem;
+      flex: 1;
+    }
+
+    .card-desc {
+      font-size: 13px;
+      color: var(--ink-muted);
+      line-height: 1.55;
+      margin-bottom: 0.8rem;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .card-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 0.8rem;
+      border-top: 1px solid var(--border);
+      font-size: 11px;
+      color: var(--ink-light);
+    }
+
+    .card-source { font-weight: 600; color: var(--ink-muted); }
+
+    .read-link {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--accent);
+      text-decoration: none;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .read-link:hover { text-decoration: underline; }
+
+    /* ===== STATES ===== */
+    .loading-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 4rem 2rem;
+      gap: 1rem;
+    }
+
+    .spinner {
+      width: 36px;
+      height: 36px;
+      border: 3px solid var(--border);
+      border-top-color: var(--ink);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .loading-text {
+      font-size: 13px;
+      color: var(--ink-muted);
+      letter-spacing: 0.04em;
+    }
+
+    .error-state {
+      background: var(--accent-light);
+      border: 1px solid var(--accent);
+      padding: 1.5rem;
+      margin: 2rem 0;
+      border-radius: 2px;
+    }
+
+    .error-state p {
+      font-size: 14px;
+      color: var(--accent);
+      margin-bottom: 0.5rem;
+    }
+
+    .error-state code {
+      font-size: 12px;
+      color: var(--ink-muted);
+      display: block;
+      margin-top: 0.5rem;
+      font-family: monospace;
+    }
+
+    /* ===== STATS BAR ===== */
+    .stats-bar {
+      display: flex;
+      gap: 2rem;
+      align-items: center;
+      padding: 0.8rem 0;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 1.5rem;
+      font-size: 12px;
+      color: var(--ink-muted);
+    }
+
+    .stats-bar strong { color: var(--ink); }
+
+    /* ===== API KEY NOTICE ===== */
+    .api-key-notice {
+      background: #fffbea;
+      border: 1.5px solid #f0c040;
+      padding: 1.2rem 1.5rem;
+      margin-bottom: 1.5rem;
+      border-radius: 2px;
+    }
+
+    .api-key-notice h3 {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      color: #7a5c00;
+      margin-bottom: 0.4rem;
+    }
+
+    .api-key-notice p {
+      font-size: 13px;
+      color: #7a5c00;
+      line-height: 1.6;
+    }
+
+    .api-key-notice a {
+      color: #c08000;
+      font-weight: 600;
+    }
+
+    .api-key-notice input {
+      margin-top: 0.8rem;
+      width: 100%;
+      padding: 0.55rem 0.8rem;
+      font-size: 13px;
+      font-family: monospace;
+      border: 1px solid #d4a800;
+      border-radius: 2px;
+      background: white;
+      color: var(--ink);
+      outline: none;
+    }
+
+    .api-key-notice button {
+      margin-top: 0.6rem;
+      background: #c08000;
+      color: white;
+      border: none;
+      padding: 0.5rem 1.2rem;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      border-radius: 2px;
+      transition: background 0.2s;
+    }
+
+    .api-key-notice button:hover { background: #a06800; }
+
+    /* ===== FOOTER ===== */
+    footer {
+      border-top: 2px solid var(--ink);
+      background: var(--surface);
+      text-align: center;
+      padding: 2rem;
+      font-size: 12px;
+      color: var(--ink-muted);
+      letter-spacing: 0.04em;
+    }
+
+    footer strong {
+      font-family: 'Playfair Display', serif;
+      font-size: 1rem;
+      color: var(--ink);
+      display: block;
+      margin-bottom: 0.3rem;
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 768px) {
+      .header-top { flex-direction: column; gap: 0.5rem; }
+      .logo { font-size: 1.6rem; }
+      .header-right, .dateline { display: none; }
+      .hero-card { grid-template-columns: 1fr; }
+      .hero-img, .hero-img-placeholder { height: 200px; }
+      .hero-content { border-left: none; border-top: 1.5px solid var(--ink); }
+      .news-grid { grid-template-columns: 1fr; }
+      .container { padding: 0 1rem; }
+      .search-wrap { padding: 0 1rem; }
+    }
+
+    /* ===== FADE IN ANIMATION ===== */
+    .fade-in {
+      animation: fadeIn 0.4s ease forwards;
+      opacity: 0;
+    }
+
+    @keyframes fadeIn { to { opacity: 1; } }
+
+    .fade-in:nth-child(1) { animation-delay: 0.05s; }
+    .fade-in:nth-child(2) { animation-delay: 0.1s; }
+    .fade-in:nth-child(3) { animation-delay: 0.15s; }
+    .fade-in:nth-child(4) { animation-delay: 0.2s; }
+    .fade-in:nth-child(5) { animation-delay: 0.25s; }
+    .fade-in:nth-child(6) { animation-delay: 0.3s; }
+  </style>
+</head>
+<body>
+
+  <!-- ===== HEADER ===== -->
+  <header>
+    <div class="header-top">
+      <div class="dateline" id="dateline">Loading date...</div>
+      <div class="logo">News<span>Now</span></div>
+      <div class="header-right">Powered by NewsAPI<br>Live Headlines</div>
+    </div>
+    <nav class="category-nav">
+      <button class="cat-btn active" data-category="general">Top Stories</button>
+      <button class="cat-btn" data-category="technology">Technology</button>
+      <button class="cat-btn" data-category="business">Business</button>
+      <button class="cat-btn" data-category="science">Science</button>
+      <button class="cat-btn" data-category="health">Health</button>
+      <button class="cat-btn" data-category="sports">Sports</button>
+      <button class="cat-btn" data-category="entertainment">Entertainment</button>
+    </nav>
+  </header>
+
+  <!-- ===== SEARCH ===== -->
+  <div class="search-wrap" style="margin-top:1rem;">
+    <div class="search-bar">
+      <input type="text" id="searchInput" placeholder="Search headlines..." />
+      <button onclick="handleSearch()">Search</button>
+    </div>
+  </div>
+
+  <!-- ===== TICKER ===== -->
+  <div class="ticker-wrap">
+    <div class="ticker-inner">
+      <div class="ticker-label">Breaking</div>
+      <div class="ticker-track">
+        <span class="ticker-text" id="tickerText">
+          Loading latest headlines... &nbsp;&nbsp;&bull;&nbsp;&nbsp;
+          Stay tuned for live updates &nbsp;&nbsp;&bull;&nbsp;&nbsp;
+          Loading latest headlines... &nbsp;&nbsp;&bull;&nbsp;&nbsp;
+          Stay tuned for live updates &nbsp;&nbsp;&bull;&nbsp;&nbsp;
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MAIN CONTENT ===== -->
+  <main class="container">
+
+    <!-- API Key Notice -->
+    <div class="api-key-notice" id="apiKeyNotice">
+      <h3>⚙️ Setup Required — Enter Your Free NewsAPI Key</h3>
+      <p>
+        Get a free API key at <a href="https://newsapi.org/register" target="_blank">newsapi.org/register</a> (takes 30 seconds).
+        Paste it below to start loading live headlines. Your key is stored only in your browser.
+      </p>
+      <input type="text" id="apiKeyInput" placeholder="Paste your NewsAPI key here (e.g. a1b2c3d4e5f6...)" />
+      <br/>
+      <button onclick="saveApiKey()">Load Headlines →</button>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-bar" id="statsBar" style="display:none;">
+      <span>Showing <strong id="articleCount">0</strong> articles</span>
+      <span>Category: <strong id="currentCategory">Top Stories</strong></span>
+      <span>Last updated: <strong id="lastUpdated">—</strong></span>
+    </div>
+
+    <!-- Hero card area -->
+    <div id="heroSection"></div>
+
+    <!-- Section label -->
+    <div class="section-label" id="sectionLabel" style="display:none;">Latest Headlines</div>
+
+    <!-- News grid -->
+    <div class="news-grid" id="newsGrid"></div>
+
+  </main>
+
+  <!-- ===== FOOTER ===== -->
+  <footer>
+    <strong>NewsNow</strong>
+    Built with HTML, CSS &amp; JavaScript &bull; Powered by <a href="https://newsapi.org" target="_blank">NewsAPI</a>
+    &bull; Codtech IT Solutions Internship — Task 1 (API Integration)
+    &bull; Intern: Karthika Shanmuga Pandian &bull; ID: CTIS9056
+  </footer>
+
+  <script>
+    /* ===========================
+       CONFIGURATION
+    =========================== */
+    // NOTE: NewsAPI free plan blocks browser (CORS) requests in production.
+    // For localhost testing it works perfectly.
+    // For live deployment, route requests through a small backend proxy.
+
+    let API_KEY = localStorage.getItem('newsapi_key') || '';
+    let currentCategory = 'general';
+    let currentQuery = '';
+
+    const BASE_URL = 'https://newsapi.org/v2/top-headlines';
+
+    /* ===========================
+       INIT
+    =========================== */
+    document.addEventListener('DOMContentLoaded', () => {
+      // Set dateline
+      const now = new Date();
+      document.getElementById('dateline').textContent =
+        now.toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+
+      // Category buttons
+      document.querySelectorAll('.cat-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          currentCategory = btn.dataset.category;
+          currentQuery = '';
+          document.getElementById('searchInput').value = '';
+          document.getElementById('currentCategory').textContent = btn.textContent;
+          if (API_KEY) fetchNews();
+        });
+      });
+
+      // Enter key search
+      document.getElementById('searchInput').addEventListener('keydown', e => {
+        if (e.key === 'Enter') handleSearch();
+      });
+
+      if (API_KEY) {
+        document.getElementById('apiKeyNotice').style.display = 'none';
+        fetchNews();
+      }
+    });
+
+    /* ===========================
+       API KEY HANDLING
+    =========================== */
+    function saveApiKey() {
+      const key = document.getElementById('apiKeyInput').value.trim();
+      if (!key) {
+        alert('Please enter a valid API key.');
+        return;
+      }
+      API_KEY = key;
+      localStorage.setItem('newsapi_key', key);
+      document.getElementById('apiKeyNotice').style.display = 'none';
+      fetchNews();
+    }
+
+    /* ===========================
+       FETCH NEWS
+    =========================== */
+    async function fetchNews() {
+      showLoading();
+
+      // Build URL
+      let url;
+      if (currentQuery) {
+        url = `https://newsapi.org/v2/everything?q=${encodeURIComponent(currentQuery)}&language=en&sortBy=publishedAt&pageSize=12&apiKey=${API_KEY}`;
+      } else {
+        url = `${BASE_URL}?category=${currentCategory}&language=en&pageSize=12&apiKey=${API_KEY}`;
+      }
+
+      try {
+        const res = await fetch(url);
+        const data = await res.json();
+
+        if (data.status === 'error') {
+          showError(data.message, data.code);
+          return;
+        }
+
+        // Filter out articles with no content
+        const articles = (data.articles || []).filter(a => a.title && a.title !== '[Removed]');
+
+        if (articles.length === 0) {
+          showEmpty();
+          return;
+        }
+
+        renderNews(articles);
+        updateTicker(articles);
+        updateStats(articles.length);
+
+      } catch (err) {
+        showError(
+          'Could not fetch news. If running from a file (file://), please use a local server (e.g. VS Code Live Server).',
+          'NETWORK_ERROR'
+        );
+      }
+    }
+
+    /* ===========================
+       RENDER
+    =========================== */
+    function renderNews(articles) {
+      const heroSection = document.getElementById('heroSection');
+      const newsGrid = document.getElementById('newsGrid');
+      const sectionLabel = document.getElementById('sectionLabel');
+
+      heroSection.innerHTML = '';
+      newsGrid.innerHTML = '';
+      sectionLabel.style.display = 'block';
+
+      const hero = articles[0];
+      const rest = articles.slice(1);
+
+      // === HERO CARD ===
+      heroSection.innerHTML = `
+        <div class="section-label" style="margin-bottom:1rem;">Featured Story</div>
+        <div class="hero-card fade-in" onclick="openArticle('${escHtml(hero.url)}')">
+          ${hero.urlToImage
+            ? `<img class="hero-img" src="${escHtml(hero.urlToImage)}" alt="${escHtml(hero.title)}" onerror="this.parentNode.querySelector('.hero-img-placeholder') && this.remove(); this.style.display='none';" />`
+            : `<div class="hero-img-placeholder">📰</div>`
+          }
+          <div class="hero-content">
+            <div>
+              <span class="hero-tag">${escHtml(hero.source?.name || currentCategory)}</span>
+              <h2 class="hero-title">${escHtml(hero.title)}</h2>
+              <p class="hero-desc">${escHtml(hero.description || 'Click to read the full article.')}</p>
+            </div>
+            <div class="hero-meta">
+              <span class="source">${escHtml(hero.source?.name || 'Unknown')}</span>
+              <span>${formatDate(hero.publishedAt)}</span>
+              <a href="${escHtml(hero.url)}" target="_blank" class="read-link" onclick="event.stopPropagation()">Read →</a>
+            </div>
+          </div>
+        </div>
+      `;
+
+      // === NEWS CARDS ===
+      rest.forEach((article, i) => {
+        const card = document.createElement('div');
+        card.className = 'news-card fade-in';
+        card.style.animationDelay = `${(i + 1) * 0.07}s`;
+        card.onclick = () => openArticle(article.url);
+
+        card.innerHTML = `
+          ${article.urlToImage
+            ? `<img class="card-img" src="${escHtml(article.urlToImage)}" alt="${escHtml(article.title)}" onerror="this.outerHTML='<div class=card-img-placeholder>📰</div>'" />`
+            : `<div class="card-img-placeholder">📰</div>`
+          }
+          <div class="card-body">
+            <div class="card-category">${escHtml(article.source?.name || currentCategory)}</div>
+            <h3 class="card-title">${escHtml(article.title)}</h3>
+            <p class="card-desc">${escHtml(article.description || '')}</p>
+            <div class="card-footer">
+              <span class="card-source">${escHtml(article.source?.name || '—')}</span>
+              <span>${formatDate(article.publishedAt)}</span>
+              <a href="${escHtml(article.url)}" target="_blank" class="read-link" onclick="event.stopPropagation()">Read →</a>
+            </div>
+          </div>
+        `;
+
+        newsGrid.appendChild(card);
+      });
+
+      document.getElementById('statsBar').style.display = 'flex';
+      document.getElementById('lastUpdated').textContent = new Date().toLocaleTimeString();
+    }
+
+    /* ===========================
+       TICKER
+    =========================== */
+    function updateTicker(articles) {
+      const titles = articles.slice(0, 6).map(a => a.title).join(' &nbsp;&nbsp;&bull;&nbsp;&nbsp; ');
+      const doubled = titles + ' &nbsp;&nbsp;&bull;&nbsp;&nbsp; ' + titles;
+      document.getElementById('tickerText').innerHTML = doubled;
+    }
+
+    /* ===========================
+       STATES
+    =========================== */
+    function showLoading() {
+      document.getElementById('heroSection').innerHTML = `
+        <div class="loading-state">
+          <div class="spinner"></div>
+          <div class="loading-text">Fetching latest headlines...</div>
+        </div>
+      `;
+      document.getElementById('newsGrid').innerHTML = '';
+      document.getElementById('sectionLabel').style.display = 'none';
+      document.getElementById('statsBar').style.display = 'none';
+    }
+
+    function showError(msg, code) {
+      document.getElementById('heroSection').innerHTML = `
+        <div class="error-state">
+          <p><strong>Could not load articles</strong></p>
+          <p>${escHtml(msg)}</p>
+          <code>Error code: ${escHtml(code || 'UNKNOWN')}</code>
+          <br/><br/>
+          <button onclick="document.getElementById('apiKeyNotice').style.display='block'; document.getElementById('apiKeyInput').value='';" style="background:var(--accent);color:white;border:none;padding:0.5rem 1rem;cursor:pointer;font-family:inherit;font-size:13px;">
+            Update API Key
+          </button>
+        </div>
+      `;
+      document.getElementById('newsGrid').innerHTML = '';
+    }
+
+    function showEmpty() {
+      document.getElementById('heroSection').innerHTML = `
+        <div class="loading-state">
+          <div style="font-size:2rem;">📭</div>
+          <div class="loading-text">No articles found. Try a different search or category.</div>
+        </div>
+      `;
+    }
+
+    function updateStats(count) {
+      document.getElementById('articleCount').textContent = count;
+    }
+
+    /* ===========================
+       HELPERS
+    =========================== */
+    function handleSearch() {
+      const q = document.getElementById('searchInput').value.trim();
+      if (!q) return;
+      if (!API_KEY) { alert('Please enter your API key first.'); return; }
+      currentQuery = q;
+      document.getElementById('currentCategory').textContent = `"${q}"`;
+      document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+      fetchNews();
+    }
+
+    function openArticle(url) {
+      if (url) window.open(url, '_blank', 'noopener');
+    }
+
+    function formatDate(iso) {
+      if (!iso) return '—';
+      const d = new Date(iso);
+      return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+    }
+
+    function escHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+  </script>
+</body>
+</html>
