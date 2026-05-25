@@ -1,0 +1,1 @@
+{"manifest_version":3,"name":"FocusTrack Time Tracker","version":"1.0.0","description":"Track time spent on websites. Productive vs unproductive analytics.","permissions":["tabs","storage","alarms","idle"],"host_permissions":["<all_urls>"],"background":{"service_worker":"background.js"},"action":{"default_popup":"popup.html"}}

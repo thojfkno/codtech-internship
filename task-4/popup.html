@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FocusTrack</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="popup.css" />
+</head>
+<body>
+  <div id="app">
+    <!-- Header -->
+    <header>
+      <div class="logo">Focus<span>Track</span></div>
+      <div class="tab-bar">
+        <button class="tab active" data-tab="today">Today</button>
+        <button class="tab" data-tab="week">Week</button>
+        <button class="tab" data-tab="sites">Sites</button>
+      </div>
+    </header>
+
+    <!-- TODAY TAB -->
+    <div id="tab-today" class="tab-content active">
+      <div class="summary-row">
+        <div class="stat-card productive">
+          <div class="stat-label">Productive</div>
+          <div class="stat-value" id="today-productive">0h 0m</div>
+        </div>
+        <div class="stat-card unproductive">
+          <div class="stat-label">Unproductive</div>
+          <div class="stat-value" id="today-unproductive">0h 0m</div>
+        </div>
+        <div class="stat-card neutral">
+          <div class="stat-label">Neutral</div>
+          <div class="stat-value" id="today-neutral">0h 0m</div>
+        </div>
+      </div>
+
+      <div class="score-section">
+        <div class="score-label">Focus Score</div>
+        <div class="score-bar-wrap">
+          <div class="score-bar" id="score-bar"></div>
+        </div>
+        <div class="score-num" id="score-num">–</div>
+      </div>
+
+      <div class="section-title">Top Sites Today</div>
+      <div id="today-list" class="site-list"></div>
+    </div>
+
+    <!-- WEEK TAB -->
+    <div id="tab-week" class="tab-content">
+      <div class="section-title">Last 7 Days</div>
+      <div id="week-chart" class="week-chart"></div>
+      <div class="summary-row" style="margin-top:12px">
+        <div class="stat-card productive">
+          <div class="stat-label">Total Productive</div>
+          <div class="stat-value" id="week-productive">0h</div>
+        </div>
+        <div class="stat-card unproductive">
+          <div class="stat-label">Total Unproductive</div>
+          <div class="stat-value" id="week-unproductive">0h</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SITES TAB -->
+    <div id="tab-sites" class="tab-content">
+      <div class="section-title">All Sites — Today</div>
+      <div id="sites-list" class="site-list full"></div>
+      <button id="clear-btn" class="clear-btn">🗑 Clear All Data</button>
+    </div>
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>
